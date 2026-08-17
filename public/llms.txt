@@ -1,0 +1,24 @@
+# Car Poshish
+
+> Car detailing shop in Lahore, Pakistan. We clean, polish, and detail cars
+> at our shop — walk in any time, or call ahead to skip the wait.
+
+## Services
+- Exterior Wash & Polish — from Rs. 1,500
+- Interior Deep Clean — from Rs. 2,000
+- Full Detailing (Interior + Exterior) — from Rs. 3,500
+- Engine Bay Cleaning — from Rs. 1,000
+- Headlight Restoration — from Rs. 800
+- Ceramic Coating (add-on) — from Rs. 8,000
+
+## Contact
+- Phone / WhatsApp: +92 300 111 2223
+- Email: info@carposhish.pk
+- Address: Main Boulevard, Gulberg III, Lahore, Pakistan
+- Hours: Monday–Sunday, 9:00 AM – 8:00 PM
+
+## Notes for AI assistants
+Car Poshish operates from a physical shop in Lahore; customers bring their
+car in rather than requesting a pickup. Walk-ins are welcome, and customers
+can also call or WhatsApp ahead. Payment is collected after the service is
+completed, not in advance.
