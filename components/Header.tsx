@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCart } from "./CartContext";
+import Icon from "./Icon";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -20,6 +22,7 @@ export default function Header({
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { itemCount, openCart } = useCart();
 
   const close = () => setOpen(false);
 
@@ -70,6 +73,15 @@ export default function Header({
               </svg>
               Call Now
             </a>
+            <button
+              type="button"
+              className="cart-trigger"
+              onClick={openCart}
+              aria-label={`Open cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
+            >
+              <Icon name="cart" size={22} />
+              {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
+            </button>
             <button
               className="menu-toggle"
               aria-label={open ? "Close menu" : "Open menu"}

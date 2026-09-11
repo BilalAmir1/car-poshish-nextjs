@@ -7,6 +7,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileBar from "@/components/MobileBar";
 import PageTransition from "@/components/PageTransition";
+import { CartProvider } from "@/components/CartContext";
+import CartDrawer from "@/components/CartDrawer";
 
 // Fraunces has real personality (a soft-serif with sharp, tapered
 // terminals) instead of the rounded, friendly-by-default display fonts
@@ -144,12 +146,15 @@ export default async function RootLayout({
           Skip to main content
         </a>
 
-        <Header phone={siteConfig.phone} />
-        <main id="main">
-          <PageTransition>{children}</PageTransition>
-        </main>
-        <Footer />
-        <MobileBar />
+        <CartProvider>
+          <Header phone={siteConfig.phone} />
+          <main id="main">
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <CartDrawer />
+          <Footer />
+          <MobileBar />
+        </CartProvider>
       </body>
     </html>
   );

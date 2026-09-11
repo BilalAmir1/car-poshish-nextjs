@@ -91,6 +91,43 @@ const paths: Record<string, React.ReactNode> = {
     </>
   ),
   chevron: <path d="M6 9l6 6 6-6" />,
+  cart: (
+    <>
+      <circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="17" cy="20" r="1.4" fill="currentColor" stroke="none" />
+      <path d="M3 4h2l2.2 11.2a1.8 1.8 0 0 0 1.8 1.5h7.6a1.8 1.8 0 0 0 1.77-1.47L20 8H6" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
+  trash: (
+    <>
+      <path d="M4 7h16" />
+      <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+      <path d="M6 7l1 13a1.5 1.5 0 0 0 1.5 1.4h7a1.5 1.5 0 0 0 1.5-1.4L18 7" />
+    </>
+  ),
+  "check-circle": (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.3 12.3l2.5 2.5 5-5" />
+    </>
+  ),
+  "shop-front": (
+    <>
+      <path d="M3 21h18" />
+      <path d="M5 21V10M19 21V10" />
+      <path d="M3 10l1.5-6h15L21 10Z" />
+    </>
+  ),
+  truck: (
+    <>
+      <path d="M3 7h11v9H3z" />
+      <path d="M14 10h4l3 3v3h-7z" />
+      <circle cx="7" cy="18.5" r="1.6" />
+      <circle cx="17.5" cy="18.5" r="1.6" />
+    </>
+  ),
 };
 
 export type IconName = keyof typeof paths;

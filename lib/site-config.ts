@@ -5,6 +5,11 @@
 // when it's available. This means the site always works standalone, even
 // before the CMS is set up.
 
+export interface DeliveryZone {
+  label: string;
+  fee: number;
+}
+
 export interface SiteSettings {
   name: string;
   shortName: string;
@@ -29,6 +34,8 @@ export interface SiteSettings {
   social: { facebook: string; instagram: string };
   mapQuery: string;
   serviceArea: string;
+  deliveryZones: DeliveryZone[];
+  freePickup: boolean;
 }
 
 export interface Service {
@@ -100,6 +107,15 @@ export const siteConfig: SiteSettings = {
   // No API key needed for a basic embed — just a URL-encoded search query.
   mapQuery: "Main Boulevard Gulberg III Lahore Pakistan",
   serviceArea: "Lahore, Pakistan",
+  // Flat fee per zone approximates distance-based delivery pricing without
+  // needing a paid maps/distance API. Editable from Site Settings in the
+  // CMS admin panel if connected — see lib/cms.ts.
+  deliveryZones: [
+    { label: "Gulberg / Model Town / DHA", fee: 150 },
+    { label: "Other areas within Lahore", fee: 300 },
+    { label: "Outside Lahore (call to confirm)", fee: 600 },
+  ],
+  freePickup: true,
 };
 
 export const services: Service[] = [
