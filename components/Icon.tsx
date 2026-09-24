@@ -128,6 +128,19 @@ const paths: Record<string, React.ReactNode> = {
       <circle cx="17.5" cy="18.5" r="1.6" />
     </>
   ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7" />
+    </>
+  ),
+  steering: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="12" r="2.2" />
+      <path d="M12 9.8V4.2M8.5 14.2 5 17M15.5 14.2 19 17" />
+    </>
+  ),
 };
 
 export type IconName = keyof typeof paths;

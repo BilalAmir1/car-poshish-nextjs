@@ -3,7 +3,7 @@ import Products from "@/components/Products";
 import CtaBanner from "@/components/CtaBanner";
 import Reveal from "@/components/Reveal";
 import { getProductsSchema } from "@/lib/structured-data";
-import { getProducts, getSiteSettings } from "@/lib/cms";
+import { getProducts } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "Shop",
@@ -13,19 +13,18 @@ export const metadata: Metadata = {
 };
 
 export default async function ProductsPage() {
-  // Fetched here too (in addition to inside <Products/>) only to build the
-  // JSON-LD — Next.js dedupes the identical underlying fetch automatically,
-  // so this isn't a second network round trip to the CMS.
-  const [products, siteConfig] = await Promise.all([getProducts(), getSiteSettings()]);
-  const productsSchema = getProductsSchema(siteConfig, products);
+  const products = await getProducts();
+  const productsSchema = products.length > 0 ? getProductsSchema(products) : null;
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productsSchema) }}
-      />
+      {productsSchema && (
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productsSchema) }}
+        />
+      )}
 
       <section style={{ paddingBottom: 0 }}>
         <div className="container section-head" style={{ marginBottom: 0 }}>

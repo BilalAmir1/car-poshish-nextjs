@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getProducts, getSiteSettings } from "@/lib/cms";
+import { notifyOwnerOfNewOrder } from "@/lib/notify";
 import type { OrderPayload, OrderResult } from "@/lib/cart";
 
 export async function POST(request: Request) {
@@ -31,28 +32,63 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid fulfillment method" }, { status: 400 });
   }
 
-  // Re-price every line item against the CMS's current product data rather
-  // than trusting the price the client sent — the only thing taken as-is
-  // from the client is the quantity and which product was selected.
+  // Every price/fee used below comes exclusively from the CMS — never
+  // from the client's request. If the CMS can't be reached, the order is
+  // rejected outright rather than falling back to whatever the client
+  // sent (which would mean silently trusting unverified prices).
   const [products, siteConfig] = await Promise.all([getProducts(), getSiteSettings()]);
+
+  if (!siteConfig || products.length === 0) {
+    console.error(
+      "[orders] Rejected an order because the CMS is unreachable — no fallback " +
+        "pricing data is used. Check STRAPI_URL and that the CMS is running."
+    );
+    return NextResponse.json(
+      {
+        error:
+          "Ordering is temporarily unavailable. Please call or WhatsApp us directly to place your order.",
+      },
+      { status: 503 }
+    );
+  }
+
   const productsById = new Map(products.map((p) => [p.id, p]));
+
+  // Any item that doesn't match a real, currently-listed product is
+  // rejected rather than priced from client input — this could mean the
+  // cart is stale (the product was removed/renamed) or the request was
+  // tampered with, and neither case should silently succeed.
+  const unknownItems = payload.items.filter((item) => !productsById.has(item.id));
+  if (unknownItems.length > 0) {
+    return NextResponse.json(
+      {
+        error:
+          "One or more items in your cart are no longer available. Please refresh the shop page and try again.",
+      },
+      { status: 409 }
+    );
+  }
 
   let subtotal = 0;
   const verifiedItems = payload.items.map((item) => {
-    const product = productsById.get(item.id);
-    const price = product?.price ?? item.price; // fall back if CMS is unreachable
-    const name = product?.name ?? item.name;
+    const product = productsById.get(item.id)!;
     const quantity = Math.max(1, Math.floor(item.quantity) || 1);
-    subtotal += price * quantity;
-    return { name, price, quantity };
+    subtotal += product.price * quantity;
+    return { name: product.name, price: product.price, quantity };
   });
 
-  // Re-derive the delivery fee from the CMS's current zone list too, rather
-  // than trusting the fee the client sent.
+  // Re-derive the delivery fee from the CMS's current zone list too —
+  // rejected the same way if the requested zone doesn't currently exist.
   let deliveryFee = 0;
   if (payload.fulfillmentMethod === "delivery") {
     const zone = siteConfig.deliveryZones.find((z) => z.label === payload.deliveryZone);
-    deliveryFee = zone?.fee ?? payload.deliveryFee ?? 0;
+    if (!zone) {
+      return NextResponse.json(
+        { error: "The selected delivery area is no longer available. Please choose again." },
+        { status: 409 }
+      );
+    }
+    deliveryFee = zone.fee;
   }
   const total = subtotal + deliveryFee;
 
@@ -61,7 +97,7 @@ export async function POST(request: Request) {
   const strapiUrl = process.env.STRAPI_URL;
   const strapiToken = process.env.STRAPI_API_TOKEN;
 
-  if (strapiUrl && strapiToken) {
+  if (strapiToken) {
     try {
       const res = await fetch(`${strapiUrl}/api/orders`, {
         method: "POST",
@@ -98,18 +134,33 @@ export async function POST(request: Request) {
     }
   } else {
     console.warn(
-      `[orders] STRAPI_URL / STRAPI_API_TOKEN not configured — order ${orderNumber} was ` +
-        "NOT saved to the CMS. The customer will still get a WhatsApp confirmation link, " +
-        "but there's no record of this order anywhere else. Set both env vars to fix this " +
-        "— see the README."
+      `[orders] STRAPI_API_TOKEN not configured — order ${orderNumber} was NOT saved ` +
+        "to the CMS. The customer will still get a WhatsApp confirmation link, but " +
+        "there's no record of this order anywhere else. See the README."
     );
   }
 
-  // The order is considered placed from the customer's side regardless of
-  // whether the Strapi write above succeeded — WhatsApp confirmation is the
-  // real backstop, matching the rest of the site's call/WhatsApp-first
-  // design. Losing the CMS record on a misconfigured or unreachable CMS
-  // shouldn't block a real customer's order.
+  // Notify the shop owner directly — this fires regardless of whether the
+  // Strapi save above succeeded, since an infra hiccup shouldn't mean the
+  // order goes completely unnoticed. Awaited (not fire-and-forget) so it
+  // isn't silently dropped on hosts that suspend the function once a
+  // response is returned, but each channel has its own short timeout so a
+  // slow/down notification service can't stall the customer's checkout.
+  await notifyOwnerOfNewOrder({
+    orderNumber,
+    items: verifiedItems,
+    subtotal,
+    fulfillmentMethod: payload.fulfillmentMethod,
+    deliveryZone: payload.fulfillmentMethod === "delivery" ? payload.deliveryZone : undefined,
+    deliveryFee,
+    total,
+    customerName: payload.customerName.trim(),
+    customerPhone: payload.customerPhone.trim(),
+    deliveryAddress: payload.deliveryAddress?.trim(),
+    deliveryCity: payload.deliveryCity?.trim(),
+    notes: payload.notes?.trim(),
+  });
+
   const result: OrderResult = { orderNumber };
   return NextResponse.json(result);
 }

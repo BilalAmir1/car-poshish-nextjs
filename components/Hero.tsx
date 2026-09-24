@@ -29,19 +29,27 @@ export default async function Hero() {
             detailing. Walk in any time, or call ahead to skip the wait.
           </p>
           <div className="hero-actions">
-            <a className="btn btn-call btn-lg" href={`tel:${siteConfig.phone}`}>
-              <Icon name="phone" size={18} />
-              Call Now: {siteConfig.phoneDisplay}
-            </a>
-            <a
-              className="btn btn-whatsapp btn-lg"
-              href={`https://wa.me/${siteConfig.whatsapp}?text=Hi%2C%20I%27d%20like%20to%20book%20a%20car%20detailing%20service.`}
-              target="_blank"
-              rel="noopener"
-            >
-              <Icon name="chat" size={18} />
-              Book on WhatsApp
-            </a>
+            {siteConfig ? (
+              <>
+                <a className="btn btn-call btn-lg" href={`tel:${siteConfig.phone}`}>
+                  <Icon name="phone" size={18} />
+                  Call Now: {siteConfig.phoneDisplay}
+                </a>
+                <a
+                  className="btn btn-whatsapp btn-lg"
+                  href={`https://wa.me/${siteConfig.whatsapp}?text=Hi%2C%20I%27d%20like%20to%20book%20a%20car%20detailing%20service.`}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <Icon name="chat" size={18} />
+                  Book on WhatsApp
+                </a>
+              </>
+            ) : (
+              <p className="hero-unavailable">
+                Booking is temporarily unavailable — please check back shortly.
+              </p>
+            )}
           </div>
 
           <ul className="hero-note-list">

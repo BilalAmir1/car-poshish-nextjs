@@ -47,6 +47,13 @@ export default async function Services({
           ))}
         </div>
 
+        {list.length === 0 && (
+          <p className="content-unavailable">
+            Services are temporarily unavailable. Please check back shortly,
+            or call/WhatsApp us directly.
+          </p>
+        )}
+
         {showViewAll && (
           <div className="section-cta">
             <Link className="btn btn-ghost" href="/services">

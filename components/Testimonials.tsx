@@ -3,6 +3,10 @@ import { getTestimonials } from "@/lib/cms";
 export default async function Testimonials() {
   const testimonials = await getTestimonials();
 
+  // A trust/nice-to-have section, not essential page content — hide it
+  // entirely rather than show an empty grid or an alarming error message.
+  if (testimonials.length === 0) return null;
+
   return (
     <section id="testimonials" className="alt-bg">
       <div className="container">

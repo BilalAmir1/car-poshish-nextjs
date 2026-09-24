@@ -3,6 +3,10 @@ import { getSiteSettings } from "@/lib/cms";
 export default async function CtaBanner() {
   const siteConfig = await getSiteSettings();
 
+  // This banner exists purely to drive a call/WhatsApp action — with no
+  // real contact details to show, there's nothing useful left to render.
+  if (!siteConfig) return null;
+
   return (
     <section>
       <div className="cta-banner">

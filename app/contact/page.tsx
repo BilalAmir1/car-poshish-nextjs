@@ -31,64 +31,73 @@ export default async function ContactPage() {
         <div className="container contact-grid">
           <div className="contact-info-card">
             <h3>Shop Details</h3>
-            <ul className="contact-detail-list">
-              <li>
-                <span className="contact-icon" aria-hidden="true"><Icon name="pin" size={17} /></span>
-                <span>
-                  <strong>Address</strong>
-                  {siteConfig.address.street}, {siteConfig.address.city},{" "}
-                  {siteConfig.address.region}
-                </span>
-              </li>
-              <li>
-                <span className="contact-icon" aria-hidden="true"><Icon name="phone" size={17} /></span>
-                <span>
-                  <strong>Phone</strong>
-                  <a href={`tel:${siteConfig.phone}`}>{siteConfig.phoneDisplay}</a>
-                </span>
-              </li>
-              <li>
-                <span className="contact-icon" aria-hidden="true"><Icon name="chat" size={17} /></span>
-                <span>
-                  <strong>WhatsApp</strong>
+            {siteConfig ? (
+              <>
+                <ul className="contact-detail-list">
+                  <li>
+                    <span className="contact-icon" aria-hidden="true"><Icon name="pin" size={17} /></span>
+                    <span>
+                      <strong>Address</strong>
+                      {siteConfig.address.street}, {siteConfig.address.city},{" "}
+                      {siteConfig.address.region}
+                    </span>
+                  </li>
+                  <li>
+                    <span className="contact-icon" aria-hidden="true"><Icon name="phone" size={17} /></span>
+                    <span>
+                      <strong>Phone</strong>
+                      <a href={`tel:${siteConfig.phone}`}>{siteConfig.phoneDisplay}</a>
+                    </span>
+                  </li>
+                  <li>
+                    <span className="contact-icon" aria-hidden="true"><Icon name="chat" size={17} /></span>
+                    <span>
+                      <strong>WhatsApp</strong>
+                      <a
+                        href={`https://wa.me/${siteConfig.whatsapp}`}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Message us on WhatsApp
+                      </a>
+                    </span>
+                  </li>
+                  <li>
+                    <span className="contact-icon" aria-hidden="true"><Icon name="mail" size={17} /></span>
+                    <span>
+                      <strong>Email</strong>
+                      <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
+                    </span>
+                  </li>
+                  <li>
+                    <span className="contact-icon" aria-hidden="true"><Icon name="clock" size={17} /></span>
+                    <span>
+                      <strong>Hours</strong>
+                      {siteConfig.hoursDisplay}
+                    </span>
+                  </li>
+                </ul>
+
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                  <a className="btn btn-call" href={`tel:${siteConfig.phone}`}>
+                    Call Now
+                  </a>
                   <a
+                    className="btn btn-whatsapp"
                     href={`https://wa.me/${siteConfig.whatsapp}`}
                     target="_blank"
                     rel="noopener"
                   >
-                    Message us on WhatsApp
+                    WhatsApp
                   </a>
-                </span>
-              </li>
-              <li>
-                <span className="contact-icon" aria-hidden="true"><Icon name="mail" size={17} /></span>
-                <span>
-                  <strong>Email</strong>
-                  <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
-                </span>
-              </li>
-              <li>
-                <span className="contact-icon" aria-hidden="true"><Icon name="clock" size={17} /></span>
-                <span>
-                  <strong>Hours</strong>
-                  {siteConfig.hoursDisplay}
-                </span>
-              </li>
-            </ul>
-
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <a className="btn btn-call" href={`tel:${siteConfig.phone}`}>
-                Call Now
-              </a>
-              <a
-                className="btn btn-whatsapp"
-                href={`https://wa.me/${siteConfig.whatsapp}`}
-                target="_blank"
-                rel="noopener"
-              >
-                WhatsApp
-              </a>
-            </div>
+                </div>
+              </>
+            ) : (
+              <p className="content-unavailable">
+                Contact details are temporarily unavailable. Please check
+                back shortly.
+              </p>
+            )}
           </div>
 
           <LocationMap />

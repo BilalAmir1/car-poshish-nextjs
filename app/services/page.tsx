@@ -22,7 +22,7 @@ export default async function ServicesPage() {
           <span className="kicker">What We Offer</span>
           <h1 style={{ fontSize: 38 }}>Our Services</h1>
           <p>
-            Every service is done at our shop in {siteConfig.address.city} by
+            Every service is done at our shop{siteConfig ? ` in ${siteConfig.address.city}` : ""} by
             an experienced team, with clear, upfront pricing.
           </p>
         </div>

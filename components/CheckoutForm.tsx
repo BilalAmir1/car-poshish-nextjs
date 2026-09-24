@@ -1,11 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "./CartContext";
 import Icon from "./Icon";
 import type { DeliveryZone } from "@/lib/site-config";
-import type { OrderPayload, OrderResult } from "@/lib/cart";
+import type { CartItem, FulfillmentMethod, OrderPayload, OrderResult } from "@/lib/cart";
+
+interface OrderSnapshot {
+  items: CartItem[];
+  subtotal: number;
+  fulfillment: FulfillmentMethod;
+  deliveryZoneLabel?: string;
+  deliveryFee: number;
+  total: number;
+  whatsappUrl: string;
+}
 
 export default function CheckoutForm({
   deliveryZones,
@@ -20,7 +30,7 @@ export default function CheckoutForm({
 }) {
   const { items, subtotal, clearCart } = useCart();
 
-  const [fulfillment, setFulfillment] = useState<"pickup" | "delivery">("pickup");
+  const [fulfillment, setFulfillment] = useState<FulfillmentMethod>("pickup");
   const [zoneIndex, setZoneIndex] = useState(0);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -30,25 +40,38 @@ export default function CheckoutForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [orderResult, setOrderResult] = useState<OrderResult | null>(null);
+  // Captured at submit time, before the cart is cleared — this is what the
+  // confirmation screen and WhatsApp link read from, NOT the live cart
+  // (which is empty by the time this screen renders).
+  const [orderSnapshot, setOrderSnapshot] = useState<OrderSnapshot | null>(null);
 
   const deliveryFee = fulfillment === "delivery" ? deliveryZones[zoneIndex]?.fee ?? 0 : 0;
   const total = subtotal + deliveryFee;
 
-  const whatsappConfirmUrl = useMemo(() => {
-    if (!orderResult) return "#";
+  function buildWhatsappUrl(
+    snapshotItems: CartItem[],
+    snapshotSubtotal: number,
+    snapshotFulfillment: FulfillmentMethod,
+    zoneLabel: string | undefined,
+    fee: number,
+    grandTotal: number,
+    orderNumber: string
+  ): string {
     const lines = [
-      `Hi, I just placed order ${orderResult.orderNumber} on the website.`,
+      `Hi, I just placed order ${orderNumber} on the website.`,
       "",
-      ...items.map((i) => `- ${i.name} x${i.quantity} (Rs. ${(i.price * i.quantity).toLocaleString("en-PK")})`),
+      ...snapshotItems.map(
+        (i) => `- ${i.name} x${i.quantity} (Rs. ${(i.price * i.quantity).toLocaleString("en-PK")})`
+      ),
       "",
-      `Subtotal: Rs. ${subtotal.toLocaleString("en-PK")}`,
-      fulfillment === "delivery"
-        ? `Delivery (${deliveryZones[zoneIndex]?.label ?? ""}): Rs. ${deliveryFee.toLocaleString("en-PK")}`
+      `Subtotal: Rs. ${snapshotSubtotal.toLocaleString("en-PK")}`,
+      snapshotFulfillment === "delivery"
+        ? `Delivery (${zoneLabel ?? ""}): Rs. ${fee.toLocaleString("en-PK")}`
         : "Pickup from shop: Rs. 0",
-      `Total: Rs. ${total.toLocaleString("en-PK")} (cash on ${fulfillment === "delivery" ? "delivery" : "pickup"})`,
+      `Total: Rs. ${grandTotal.toLocaleString("en-PK")} (cash on ${snapshotFulfillment === "delivery" ? "delivery" : "pickup"})`,
     ];
     return `https://wa.me/${whatsapp}?text=${encodeURIComponent(lines.join("\n"))}`;
-  }, [orderResult, items, subtotal, fulfillment, zoneIndex, deliveryFee, total, deliveryZones, whatsapp]);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -63,11 +86,13 @@ export default function CheckoutForm({
       return;
     }
 
+    const zoneLabel = fulfillment === "delivery" ? deliveryZones[zoneIndex]?.label : undefined;
+
     const payload: OrderPayload = {
       items: items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
       subtotal,
       fulfillmentMethod: fulfillment,
-      deliveryZone: fulfillment === "delivery" ? deliveryZones[zoneIndex]?.label : undefined,
+      deliveryZone: zoneLabel,
       deliveryFee,
       total,
       customerName: customerName.trim(),
@@ -84,8 +109,45 @@ export default function CheckoutForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Order could not be placed");
+
+      if (!res.ok) {
+        // Surface the API's specific reason (CMS unavailable, item no
+        // longer exists, delivery zone changed, etc.) rather than a
+        // generic message — these are meaningful, actionable errors, not
+        // just "something went wrong."
+        let message = "Order could not be placed. Please try again, or call/WhatsApp us directly.";
+        try {
+          const body = (await res.json()) as { error?: string };
+          if (body?.error) message = body.error;
+        } catch {
+          // Response wasn't JSON — keep the generic message above.
+        }
+        setError(message);
+        return;
+      }
+
       const result = (await res.json()) as OrderResult;
+
+      // Snapshot everything needed to render the confirmation screen and
+      // build the WhatsApp link BEFORE clearing the cart — items/subtotal
+      // from useCart() will be gone the instant clearCart() runs.
+      setOrderSnapshot({
+        items,
+        subtotal,
+        fulfillment,
+        deliveryZoneLabel: zoneLabel,
+        deliveryFee,
+        total,
+        whatsappUrl: buildWhatsappUrl(
+          items,
+          subtotal,
+          fulfillment,
+          zoneLabel,
+          deliveryFee,
+          total,
+          result.orderNumber
+        ),
+      });
       setOrderResult(result);
       clearCart();
     } catch {
@@ -95,24 +157,38 @@ export default function CheckoutForm({
     }
   }
 
-  if (orderResult) {
+  if (orderResult && orderSnapshot) {
     return (
       <div className="checkout-confirmation">
         <Icon name="check-circle" size={48} />
         <h2>Order Placed</h2>
         <p className="order-number">Order #{orderResult.orderNumber}</p>
+
+        <ul className="checkout-summary-items checkout-confirmation-items">
+          {orderSnapshot.items.map((item) => (
+            <li key={item.id}>
+              <span>{item.name} × {item.quantity}</span>
+              <span>Rs. {(item.price * item.quantity).toLocaleString("en-PK")}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="checkout-summary-row checkout-summary-total">
+          <span>Total</span>
+          <span>Rs. {orderSnapshot.total.toLocaleString("en-PK")}</span>
+        </div>
+
         <p>
-          {fulfillment === "delivery"
+          {orderSnapshot.fulfillment === "delivery"
             ? "We'll call you shortly to confirm your delivery."
             : `We'll have your order ready for pickup at ${shopAddress}.`}
         </p>
         <p className="cart-note">
-          Pay in cash on {fulfillment === "delivery" ? "delivery" : "pickup"} — no
+          Pay in cash on {orderSnapshot.fulfillment === "delivery" ? "delivery" : "pickup"} — no
           online payment is needed. If payment isn't made at that time, the
           order won't be handed over.
         </p>
         <div className="checkout-confirmation-actions">
-          <a className="btn btn-whatsapp btn-lg" href={whatsappConfirmUrl} target="_blank" rel="noopener">
+          <a className="btn btn-whatsapp btn-lg" href={orderSnapshot.whatsappUrl} target="_blank" rel="noopener">
             <Icon name="chat" size={18} /> Confirm on WhatsApp
           </a>
           <Link className="btn btn-ghost" href="/shop">

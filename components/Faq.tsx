@@ -4,6 +4,11 @@ import Icon from "./Icon";
 
 export default async function Faq() {
   const faqs = await getFaqs();
+
+  // A nice-to-have section, not essential — hide it entirely rather than
+  // show an empty list or emit FAQPage structured data with no questions.
+  if (faqs.length === 0) return null;
+
   const faqSchema = getFaqSchema(faqs);
 
   return (

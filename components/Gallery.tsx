@@ -36,10 +36,17 @@ export default async function Gallery({ showHeading = true }: { showHeading?: bo
             </div>
           ))}
         </div>
-        <p className="gallery-note">
-          Replace these placeholder blocks with your own before/after photos
-          once you have them.
-        </p>
+
+        {items.length === 0 ? (
+          <p className="content-unavailable">
+            Our gallery is temporarily unavailable. Please check back shortly.
+          </p>
+        ) : (
+          <p className="gallery-note">
+            Replace these placeholder blocks with your own before/after photos
+            once you have them.
+          </p>
+        )}
       </div>
     </section>
   );

@@ -727,6 +727,45 @@ section {
 }
 
 /* ---------- Products (shop) ---------- */
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.category-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.category-filter:hover {
+  border-color: var(--sky);
+  color: var(--ink);
+}
+
+.category-filter.active {
+  background: var(--ocean);
+  border-color: var(--ocean);
+  color: var(--white);
+}
+
+.category-count {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
 .products-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -804,6 +843,49 @@ section {
 .gallery-note {
   color: var(--ink-soft);
   font-size: 14.5px;
+}
+
+/* ---------- "CMS unavailable" states ---------- */
+/* Deliberately visible and honest rather than silently substituting
+   placeholder content — see lib/cms.ts for why. */
+.content-unavailable {
+  background: #fdf3e7;
+  border: 1px solid #f0d9b5;
+  color: #8a5a1e;
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  font-size: 15.5px;
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.footer-unavailable {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 14px;
+  font-style: italic;
+  margin: 0;
+}
+
+.hero-unavailable {
+  background: #fdf3e7;
+  border: 1px solid #f0d9b5;
+  color: #8a5a1e;
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  font-size: 15px;
+  display: inline-block;
+}
+
+.map-unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mist);
+  color: var(--ink-soft);
+  font-size: 15px;
+  text-align: center;
+  padding: 24px;
 }
 
 @media (max-width: 980px) {
@@ -1744,6 +1826,19 @@ footer p {
   color: var(--sky-dark);
 }
 
+.checkout-confirmation-items {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin: 8px 0 0;
+}
+
+.checkout-confirmation .checkout-summary-total {
+  width: 100%;
+}
+
 .checkout-confirmation-actions {
   display: flex;
   gap: 12px;
@@ -1761,6 +1856,178 @@ footer p {
     order: -1;
   }
   .fulfillment-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Seat cover configurator ---------- */
+.seatcover-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.seatcover-preview {
+  position: sticky;
+  top: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.seatcover-canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+
+.seatcover-canvas svg {
+  max-width: 260px;
+}
+
+.seatcover-price-box {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.seatcover-price-label {
+  font-family: var(--font-mono), monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.seatcover-price-value {
+  font-family: var(--font-mono), monospace;
+  font-weight: 700;
+  font-size: 30px;
+  color: var(--ocean);
+}
+
+.seatcover-turnaround {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+.seatcover-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.option-group h3 {
+  font-size: 17px;
+  margin-bottom: 12px;
+  color: var(--ocean);
+}
+
+.option-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.option-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  background: var(--white);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.option-card:hover {
+  border-color: var(--sky);
+}
+
+.option-card.selected {
+  border-color: var(--sky-dark);
+  background: var(--mist);
+}
+
+.option-card strong {
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.option-card-desc {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.option-card > span:last-child {
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  color: var(--sky-dark);
+  font-weight: 600;
+}
+
+.swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.swatch-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.swatch:hover {
+  transform: translateY(-2px);
+}
+
+.swatch.selected {
+  border-color: var(--ocean);
+  box-shadow: 0 0 0 3px var(--mist);
+}
+
+.swatch-label {
+  display: block;
+  margin-top: 8px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.seatcover-note {
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-align: center;
+  margin: 10px 0 0;
+}
+
+@media (max-width: 900px) {
+  .seatcover-layout {
+    grid-template-columns: 1fr;
+  }
+  .seatcover-preview {
+    position: static;
+  }
+  .option-cards {
     grid-template-columns: 1fr;
   }
 }

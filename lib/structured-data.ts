@@ -1,4 +1,4 @@
-import type { SiteSettings, Service, Faq, Product } from "./site-config";
+import { SITE_URL, type SiteSettings, type Service, type Faq, type Product } from "./site-config";
 
 // LocalBusiness (AutoWash subtype) schema.
 // This is what tells Google Search, Google Maps, and AI answer engines
@@ -8,14 +8,14 @@ export function getLocalBusinessSchema(siteConfig: SiteSettings, services: Servi
   return {
     "@context": "https://schema.org",
     "@type": "AutoWash",
-    "@id": `${siteConfig.url}/#business`,
+    "@id": `${SITE_URL}/#business`,
     name: siteConfig.name,
     description: siteConfig.description,
-    url: siteConfig.url,
+    url: SITE_URL,
     telephone: siteConfig.phone,
     email: siteConfig.email,
     priceRange: siteConfig.priceRange,
-    image: `${siteConfig.url}/og-image.jpg`,
+    image: `${SITE_URL}/og-image.jpg`,
     address: {
       "@type": "PostalAddress",
       streetAddress: siteConfig.address.street,
@@ -89,7 +89,7 @@ export function getFaqSchema(faqs: Faq[]) {
 
 // Product catalog schema for the /shop page — helps individual products
 // surface in Google Shopping-style results and AI answer engines.
-export function getProductsSchema(siteConfig: SiteSettings, products: Product[]) {
+export function getProductsSchema(products: Product[]) {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -107,9 +107,9 @@ export function getProductsSchema(siteConfig: SiteSettings, products: Product[])
           price: product.price,
           priceCurrency: "PKR",
           availability: "https://schema.org/InStock",
-          url: `${siteConfig.url}/shop`,
+          url: `${SITE_URL}/shop`,
           seller: {
-            "@id": `${siteConfig.url}/#business`,
+            "@id": `${SITE_URL}/#business`,
           },
         },
       },
@@ -123,9 +123,9 @@ export function getWebsiteSchema(siteConfig: SiteSettings) {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": `${siteConfig.url}/#website`,
-    url: siteConfig.url,
+    "@id": `${SITE_URL}/#website`,
+    url: SITE_URL,
     name: siteConfig.name,
-    publisher: { "@id": `${siteConfig.url}/#business` },
+    publisher: { "@id": `${SITE_URL}/#business` },
   };
 }

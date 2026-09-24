@@ -24,12 +24,19 @@ export default async function CheckoutPage() {
           </p>
         </div>
 
-        <CheckoutForm
-          deliveryZones={siteConfig.deliveryZones}
-          freePickup={siteConfig.freePickup}
-          whatsapp={siteConfig.whatsapp}
-          shopAddress={`${siteConfig.address.street}, ${siteConfig.address.city}`}
-        />
+        {siteConfig ? (
+          <CheckoutForm
+            deliveryZones={siteConfig.deliveryZones}
+            freePickup={siteConfig.freePickup}
+            whatsapp={siteConfig.whatsapp}
+            shopAddress={`${siteConfig.address.street}, ${siteConfig.address.city}`}
+          />
+        ) : (
+          <p className="content-unavailable">
+            Checkout is temporarily unavailable. Please call or WhatsApp us
+            directly to place your order.
+          </p>
+        )}
       </div>
     </section>
   );
